@@ -1,15 +1,15 @@
+// App.js
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 function App() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! Ask me anything about the PDF content.' }
+    { role: 'assistant', content: 'Hello! Ask me anything about sustainable practices.' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -18,13 +18,11 @@ function App() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    // Add user message
     setMessages(prev => [...prev, { role: 'user', content: input }]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // Call Vercel serverless function
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,7 +41,7 @@ function App() {
 
   return (
     <div className="chatbot-container">
-      <h1>PDF Knowledge Bot</h1>
+      <h1>Sustainability Knowledge Bot</h1>
       
       <div className="chat-window">
         {messages.map((msg, i) => (
@@ -69,7 +67,7 @@ function App() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isLoading}
-          placeholder="Ask about the PDF..."
+          placeholder="Ask about sustainable practices..."
           autoFocus
         />
         <button type="submit" disabled={isLoading}>
