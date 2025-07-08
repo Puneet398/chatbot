@@ -5,7 +5,7 @@ import { HfInference } from '@huggingface/inference';
 import './App.css';
 
 // Initialize Hugging Face inference
-const hf = new HfInference(process.env.REACT_APP_HF_API_KEY);
+const hf = new HfInference(process.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);
 
 function App() {
   const [messages, setMessages] = useState([
@@ -86,18 +86,36 @@ function App() {
   };
 
   // Simple context extraction
-  const extractRelevantContext = (question, fullText) => {
-    const keywords = question.toLowerCase().split(/\s+/);
-    const sentences = fullText.split(/[.!?]+/);
+const extractRelevantContext = (question, fullText) => {
+    if (!question || !fullText) return '';
     
-    return sentences
-      .filter(sentence => 
-        keywords.some(keyword => 
-          sentence.toLowerCase().includes(keyword)
-      )
-      .slice(0, 5)
-      .join('. ');
-  };
+    // Remove common stopwords and short words
+    const stopwords = new Set(['the', 'and', 'or', 'is', 'are', 'what', 'how']);
+    const keywords = question.toLowerCase()
+                           .split(/\s+/)
+                           .filter(word => word.length > 2 && !stopwords.has(word));
+    
+    if (keywords.length === 0) return fullText.slice(0, 500); // Return first 500 chars if no keywords
+    
+    // Split sentences more accurately
+    const sentences = fullText.split(/(?<=[.!?])\s+/);
+    
+    // Score sentences based on keyword matches
+    const scoredSentences = sentences.map(sentence => {
+        const lowerSentence = sentence.toLowerCase();
+        const score = keywords.reduce((sum, keyword) => 
+            sum + (lowerSentence.includes(keyword) ? 1 : 0), 0);
+        return { sentence, score };
+    });
+    
+    // Get top 5 most relevant sentences
+    return scoredSentences
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+        .map(item => item.sentence)
+        .join(' ')
+        .substring(0, 1000); // Limit total length
+};
 
   return (
     <div className="app">
